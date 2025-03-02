@@ -39,6 +39,7 @@ body {
     border-radius: 50%;
     position: absolute;
     cursor: pointer;
+    z-index: 10;
 }
 
 #role-selection {
@@ -88,3 +89,51 @@ body {
     background-color: darkgreen;
 }
 
+/* Red Circle (Center Marker) */
+.red-circle {
+    width: 190px; /* Increased size (3.6x) */
+    height: 190px;
+    background-color: red;
+    border-radius: 50%;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-41%, -46%);
+    z-index: 8;
+}
+
+/* Yellow Ropes */
+.yellow-rope {
+    width: 10px;
+    position: absolute;
+    background-color: yellow;
+    left: 50%;
+    top: 50%;
+    transform-origin: center center;
+    z-index: 5;
+}
+
+/* Short ropes */
+.short-rope {
+    height: 70px;
+}
+
+/* Long ropes */
+.long-rope {
+    height: 140px;
+}
+
+.link-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.link-button:hover {
+    background-color: #0056b3;
+}

@@ -1,50 +1,31 @@
 document.addEventListener("DOMContentLoaded", () => {
     const clickableArea = document.getElementById("clickable-area");
     const feedback = document.getElementById("feedback");
+    const kaboomMessage = document.createElement("p"); // Create kaboom message element
+    kaboomMessage.id = "kaboom-message";
+    feedback.after(kaboomMessage); // Place it right after the feedback
     const gameTitle = document.getElementById("game-title");
     const roleButtons = document.querySelectorAll(".role-btn");
     const startButton = document.getElementById("start-button");
-    const gameContainer = document.getElementById("game-container");
 
     let selectedRole = null;
-    let currentField = null;
-    let shortageType = null;
-    let step = 1; // Track game progress
+    let shortageType;
+    let shortRoles, longRoles;
+    let ropeMap = {};
 
-    // Positions for green circles
-    const positions = [
-        { x: 100, y: 115, marker: "1" },
-        { x: 290, y: 115, marker: "A" },
-        { x: 480, y: 115, marker: "2" },
-        { x: 465, y: 290, marker: "B" },
-        { x: 480, y: 465, marker: "3" },
-        { x: 290, y: 465, marker: "C" },
-        { x: 100, y: 465, marker: "4" },
-        { x: 115, y: 290, marker: "D" },
-        { x: 264, y: 315, marker: "Safe 4th Quad" },
-        { x: 315, y: 265, marker: "Safe 2nd Quad" }
+    // **Positions for circles (clockwise from A)**
+    const labeledPositions = [
+        { x: 290, y: 160, marker: "A" },
+        { x: 380, y: 200, marker: "2" },
+        { x: 420, y: 285, marker: "B" },
+        { x: 380, y: 370, marker: "3" },
+        { x: 290, y: 410, marker: "C" },
+        { x: 200, y: 370, marker: "4" },
+        { x: 160, y: 285, marker: "D" },
+        { x: 200, y: 200, marker: "1" }
     ];
 
-    // Generate circles once when the page loads
-    function generateInitialCircles() {
-        clickableArea.innerHTML = ""; // Clear any previous circles
-
-        positions.forEach((pos) => {
-            let circle = document.createElement("div");
-            circle.classList.add("green-circle");
-            circle.style.left = `${pos.x}px`;
-            circle.style.top = `${pos.y}px`;
-            circle.dataset.marker = pos.marker;
-
-            circle.addEventListener("click", (event) => {
-                handleSelection(event.target.dataset.marker);
-            });
-
-            clickableArea.appendChild(circle);
-        });
-    }
-
-    // Role selection logic
+    // **Role selection logic**
     roleButtons.forEach(button => {
         button.addEventListener("click", () => {
             roleButtons.forEach(btn => btn.classList.remove("active"));
@@ -57,76 +38,148 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // Start/Reset button logic
+    // **Start/Reset button logic**
     startButton.addEventListener("click", () => {
         if (selectedRole) {
             startGame();
         }
     });
 
-    // Function to start the game while keeping the selected role
+    // **Function to start/reset the game**
     function startGame() {
-        step = 1; // Reset game step
+        feedback.innerText = "";
+        kaboomMessage.innerText = ""; // Clear kaboom message on reset
+        ropeMap = {};
 
-        // Randomly set field background
-        const fieldImages = ["img/fieldA.png", "img/fieldB.png"];
-        currentField = fieldImages[Math.floor(Math.random() * fieldImages.length)];
-        gameContainer.style.background = `url('${currentField}') no-repeat center center`;
-        gameContainer.style.backgroundSize = "cover";
-
-        // Randomly decide if DPS or Supports are short
+        // **Randomly decide if DPS or Supports are short**
         const shortages = ["DPS Short", "Supports Short"];
         shortageType = shortages[Math.floor(Math.random() * shortages.length)];
 
-        gameTitle.innerText = `${shortageType} - Choose the correct spot!`;
-        console.log(`Field selected: ${currentField}`);
-        console.log(`Shortage Type: ${shortageType}`);
+        let longType = shortageType === "DPS Short" ? "Supports Long" : "DPS Long";
+        gameTitle.innerText = `${shortageType} - ${longType} - Click your fuse.`;
 
-        feedback.innerText = ""; // Clear previous feedback
+        // **Assign correct role orders**
+        if (shortageType === "DPS Short") {
+            shortRoles = ["M1", "M2", "R1", "R2"];
+            longRoles = ["MT", "OT", "H1", "H2"];
+        } else {
+            shortRoles = ["MT", "OT", "H1", "H2"];
+            longRoles = ["M1", "M2", "R1", "R2"];
+        }
 
-        // Change the Start button into a Reset button
+        clickableArea.innerHTML = ""; // Clear previous elements
+        generateYellowRopes();
+        generateCircles();
+        generateCenterRedCircle();
+
         startButton.innerText = "Reset";
     }
 
-    // Function to handle selections based on step
-    function handleSelection(marker) {
-        let correctMarkersStep1 = {};
-        let correctMarkersStep2 = {};
+    // **Function to generate ropes**
+    function generateYellowRopes() {
+        const centerX = 295;
+        const centerY = 260;
+        const allAngles = [0, 45, 90, 135, 180, 225, 270, 315];
+        const circleLabels = {
+            0: "A", 45: "2", 90: "B", 135: "3",
+            180: "C", 225: "4", 270: "D", 315: "1"
+        };
 
-        if (currentField === "img/fieldA.png") {
-            if (shortageType === "DPS Short") {
-                correctMarkersStep1 = { "MT": "Safe 4th Quad", "OT": "Safe 4th Quad", "H1": "Safe 4th Quad", "H2": "Safe 4th Quad", "M1": "D", "M2": "C", "R1": "2", "R2": "4" };
-                correctMarkersStep2 = { "MT": "A", "OT": "B", "H1": "1", "H2": "3", "M1": "Safe 2nd Quad", "M2": "Safe 2nd Quad", "R1": "Safe 2nd Quad", "R2": "Safe 2nd Quad" };
-            } else { // Supports Short
-                correctMarkersStep1 = { "MT": "D", "OT": "C", "H1": "2", "H2": "4", "M1": "Safe 4th Quad", "M2": "Safe 4th Quad", "R1": "Safe 4th Quad", "R2": "Safe 4th Quad" };
-                correctMarkersStep2 = { "MT": "Safe 2nd Quad", "OT": "Safe 2nd Quad", "H1": "Safe 2nd Quad", "H2": "Safe 2nd Quad", "M1": "A", "M2": "B", "R1": "1", "R2": "3" };
-            }
-        } else if (currentField === "img/fieldB.png") {
-            if (shortageType === "DPS Short") {
-                correctMarkersStep1 = { "MT": "Safe 2nd Quad", "OT": "Safe 2nd Quad", "H1": "Safe 2nd Quad", "H2": "Safe 2nd Quad", "M1": "A", "M2": "B", "R1": "2", "R2": "4" };
-                correctMarkersStep2 = { "MT": "D", "OT": "C", "H1": "1", "H2": "3", "M1": "Safe 4th Quad", "M2": "Safe 4th Quad", "R1": "Safe 4th Quad", "R2": "Safe 4th Quad" };
-            } else { // Supports Short
-                correctMarkersStep1 = { "MT": "A", "OT": "B", "H1": "2", "H2": "4", "M1": "Safe 2nd Quad", "M2": "Safe 2nd Quad", "R1": "Safe 2nd Quad", "R2": "Safe 2nd Quad" };
-                correctMarkersStep2 = { "MT": "Safe 4th Quad", "OT": "Safe 4th Quad", "H1": "Safe 4th Quad", "H2": "Safe 4th Quad", "M1": "D", "M2": "C", "R1": "1", "R2": "3" };
-            }
+        let availableAngles = [...allAngles];
+        let shortRopePositions = [];
+        let longRopePositions = [];
+
+        function getRandomAngle() {
+            const randomIndex = Math.floor(Math.random() * availableAngles.length);
+            return availableAngles.splice(randomIndex, 1)[0];
         }
 
-        if (step === 1 && correctMarkersStep1[selectedRole] === marker) {
-            feedback.innerText = `✅ Correct! ${marker} was your first spot.`;
-            feedback.style.color = "green";
-            step = 2;
-            gameTitle.innerText = "Now where do you go?";
-
-            gameContainer.style.background = currentField === "img/fieldA.png" ? 
-                "url('img/fieldA2.png') no-repeat center center" : 
-                "url('img/fieldB2.png') no-repeat center center";
-            gameContainer.style.backgroundSize = "cover";
-        } else if (step === 2 && correctMarkersStep2[selectedRole] === marker) {
-            feedback.innerText = `🎉 You Win! ${marker} was your final spot.`;
-            feedback.style.color = "blue";
-            gameTitle.innerText = "Congratulations! You solved the mechanic.";
+        for (let i = 0; i < 4; i++) {
+            let angle = getRandomAngle();
+            let pos = circleLabels[angle];
+            shortRopePositions.push(pos);
+            ropeMap[pos] = "short";
+            createRopeElement(pos, "short", centerX, centerY, angle);
         }
+
+        for (let i = 0; i < 4; i++) {
+            let angle = getRandomAngle();
+            let pos = circleLabels[angle];
+            longRopePositions.push(pos);
+            ropeMap[pos] = "long";
+            createRopeElement(pos, "long", centerX, centerY, angle);
+        }
+
+        assignRolesToRopes(shortRopePositions, shortRoles, "short");
+        assignRolesToRopes(longRopePositions, longRoles, "long");
     }
 
-    generateInitialCircles();
+    // **Function to create rope elements**
+    function createRopeElement(position, type, centerX, centerY, angle) {
+        let rope = document.createElement("div");
+        rope.classList.add("yellow-rope", `${type}-rope`);
+        rope.style.left = `${centerX}px`;
+        rope.style.top = type === "long" ? `${centerY - 35}px` : `${centerY}px`;
+        rope.style.transform = `rotate(${angle}deg) translateY(${type === "long" ? "-160px" : "-128px"})`;
+        clickableArea.appendChild(rope);
+    }
+
+    // **Function to assign roles to ropes**
+    function assignRolesToRopes(ropePositions, roleOrder, type) {
+        let sortedRopes = ropePositions.sort((a, b) => 
+            labeledPositions.findIndex(p => p.marker === a) - labeledPositions.findIndex(p => p.marker === b)
+        );
+
+        sortedRopes.forEach((pos, index) => {
+            if (index < roleOrder.length) {
+                ropeMap[`${type}RoleMap`] = ropeMap[`${type}RoleMap`] || {};
+                ropeMap[`${type}RoleMap`][pos] = roleOrder[index];
+            }
+        });
+    }
+
+    // **Function to generate green circles and handle game logic**
+    function generateCircles() {
+        labeledPositions.forEach((pos) => {
+            let circle = document.createElement("div");
+            circle.classList.add("green-circle");
+            circle.style.left = `${pos.x}px`;
+            circle.style.top = `${pos.y}px`;
+            circle.dataset.marker = pos.marker;
+
+            circle.addEventListener("click", () => {
+                let ropeStatus = ropeMap[pos.marker] || "safe";
+                let expectedRole = ropeMap.shortRoleMap?.[pos.marker] || ropeMap.longRoleMap?.[pos.marker] || null;
+
+                if (!expectedRole) {
+                    feedback.innerText = `❌ Wrong! ${selectedRole}, this is not a valid selection.`;
+                    feedback.style.color = "red";
+                    kaboomMessage.innerText = ""; // Clear kaboom message on incorrect
+                } else if (selectedRole === expectedRole) {
+                    feedback.innerText = `✅ Correct! ${selectedRole} clicked ${pos.marker}, a ${ropeStatus} rope.`;
+                    feedback.style.color = "green";
+                    
+                    // **Add Kaboom Order message based on shortage type**
+                    kaboomMessage.innerText = (shortageType === "DPS Short") 
+                        ? "💥 Kaboom order is M1 M2 R1 R2 then MT OT H1 H2 \nWait for the 2 second vuln to fall and heal up before the next boom\n\n Hit Reset to go again"
+                        : "💥 Kaboom order is MT OT H1 H2 then M1 M2 R1 R2 \nWait for the 2 second vuln to fall and heal up before the next boom\n\n Hit Reset to go again";
+
+                } else {
+                    feedback.innerText = `❌ Wrong! ${selectedRole}, Everyone is probably dead now.`;
+                    feedback.style.color = "red";
+                    kaboomMessage.innerText = ""; // Clear kaboom message on incorrect
+                }
+            });
+
+            clickableArea.appendChild(circle);
+        });
+    }
+
+    function generateCenterRedCircle() {
+        let redCircle = document.createElement("div");
+        redCircle.classList.add("red-circle");
+        redCircle.style.left = "285px";
+        redCircle.style.top = "285px";
+        clickableArea.appendChild(redCircle);
+    }
 });
