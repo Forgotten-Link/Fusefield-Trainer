@@ -1,0 +1,90 @@
+body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+#game-container {
+    position: relative;
+    width: 600px;
+    height: 600px;
+    margin: auto;
+    border: 2px solid black;
+    background: url('img/field.png') no-repeat center center;
+    background-size: cover; /* Makes sure the image covers the entire area */
+}
+
+#game-background {
+    width: 100%;
+    height: 100%;
+}
+
+#feedback {
+    font-size: 24px; /* Increase font size */
+    font-weight: bold; /* Make it bold */
+    text-align: center; /* Center the text */
+    margin-top: 15px; /* Add spacing */
+}
+
+body {
+    background-color: #424242; /* Change to any color */
+    color: white; /* Optional: Makes text easier to read */
+}
+
+
+.green-circle {
+    width: 15px;
+    height: 15px;
+    border: 3px solid blue;
+    background-color: transparent;
+    border-radius: 50%;
+    position: absolute;
+    cursor: pointer;
+}
+
+#role-selection {
+    margin: 20px 0;
+}
+
+.role-btn {
+    padding: 10px 15px;
+    margin: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 2px solid #333;
+    background-color: white;
+    color: black;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+.role-btn:hover {
+    background-color: #ddd;
+}
+
+.role-btn.active {
+    background-color: green;
+    color: white;
+    border-color: darkgreen;
+}
+
+#start-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    margin-top: 15px;
+    cursor: not-allowed;
+    background-color: gray;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: 0.3s;
+}
+
+#start-button.enabled {
+    background-color: green;
+    cursor: pointer;
+}
+
+#start-button.enabled:hover {
+    background-color: darkgreen;
+}
+
