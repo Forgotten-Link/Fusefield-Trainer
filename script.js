@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function startGame() {
         feedback.innerText = "";
         kaboomMessage.innerText = ""; // Clear kaboom message on reset
+        removePlacementBoxes(); // Remove old placement boxes
         ropeMap = {};
 
         // **Randomly decide if DPS or Supports are short**
@@ -163,6 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     kaboomMessage.innerText = (shortageType === "DPS Short") 
                         ? "💥 Kaboom order is M1 M2 R1 R2 then MT OT H1 H2 \nWait for the 2 second vuln to fall and heal up before the next boom\n\n Hit Reset to go again"
                         : "💥 Kaboom order is MT OT H1 H2 then M1 M2 R1 R2 \nWait for the 2 second vuln to fall and heal up before the next boom\n\n Hit Reset to go again";
+                    showPlacementBoxes(); // Show correct placements
 
                 } else {
                     feedback.innerText = `❌ Wrong! ${selectedRole}, Everyone is probably dead now.`;
@@ -182,4 +184,33 @@ document.addEventListener("DOMContentLoaded", () => {
         redCircle.style.top = "285px";
         clickableArea.appendChild(redCircle);
     }
+
+    function showPlacementBoxes() {
+        labeledPositions.forEach(pos => {
+            if (ropeMap[pos.marker]) {
+                let role = ropeMap.shortRoleMap?.[pos.marker] || ropeMap.longRoleMap?.[pos.marker] || "";
+                let box = document.createElement("div");
+                box.classList.add("placement-box");
+                box.style.left = `${pos.x - 15}px`;
+                box.style.top = `${pos.y - 25}px`;
+                box.innerText = role;
+    
+                // **Set text color based on role**
+                if (role === "MT" || role === "OT") {
+                    box.style.color = "blue"; // Tanks
+                } else if (role === "H1" || role === "H2") {
+                    box.style.color = "green"; // Healers
+                } else {
+                    box.style.color = "red"; // M1, M2, R1, R2 (DPS)
+                }
+    
+                clickableArea.appendChild(box);
+            }
+        });
+    }
+
+    function removePlacementBoxes() {
+        document.querySelectorAll(".placement-box").forEach(box => box.remove());
+    }
+    
 });
